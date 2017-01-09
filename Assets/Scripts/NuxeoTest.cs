@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class NuxeoTest : MonoBehaviour {
 
+    public GazeTriggerController trigger;
+
     IEnumerator WaitForRequest(WWW www) {
         //http://answers.unity3d.com/questions/207920/callback-from-a-coroutine.html
         yield return www;
@@ -23,7 +25,20 @@ public class NuxeoTest : MonoBehaviour {
     }
 
     void Start() {
+        trigger.setCallbacks(onEnter, onTrigger, onExit);
+    }
+
+    void onEnter() {
+        Debug.Log("Enter!");
+    }
+
+    void onTrigger() {
+        Debug.Log("Trigger!");
         getRoot();
+    }
+
+    void onExit() {
+        Debug.Log("Exit!");
     }
 
 }

@@ -4,15 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GazeTriggerController : MonoBehaviour {
-    
+
+    public float gazeTime = 1.0f;
+    public Color baseColor = Color.white;
+    public Color loadingColor = Color.blue;
+    public Color completeColor = Color.green;
+
     Image image;
     bool isLoading;
     float startTime;
-
-    public float gazeTime = 1.0f;
-    public Color baseColor = Color.black;
-    public Color loadingColor = Color.blue;
-    public Color completeColor = Color.green;
+    public delegate void OnEnterDelegate();
+    public delegate void OnTriggerDelegate();
+    public delegate void OnExitDelegate();
+    OnEnterDelegate onEnterDelegate;
+    OnTriggerDelegate onTriggerDelegate;
+    OnExitDelegate onExitDelegate;
 
     void Start() {
         GameObject baseGameObject = transform.Find("Base").gameObject;
@@ -27,6 +33,7 @@ public class GazeTriggerController : MonoBehaviour {
             image.fillAmount = (Time.time - startTime) / gazeTime;
             if (image.fillAmount >= 1) {
                 image.color = completeColor;
+                onTriggerDelegate();
             }
         }
     }
@@ -35,11 +42,19 @@ public class GazeTriggerController : MonoBehaviour {
         isLoading = true;
         image.color = loadingColor;
         startTime = Time.time;
+        onEnterDelegate();
     }
 
     public void OnExit() {
         isLoading = false;
         image.fillAmount = 0.0f;
+        onExitDelegate();
+    }
+
+    public void setCallbacks(OnEnterDelegate enter, OnTriggerDelegate trigger, OnExitDelegate exit) {
+        onEnterDelegate = enter;
+        onTriggerDelegate = trigger;
+        onExitDelegate = exit;
     }
 
 }
