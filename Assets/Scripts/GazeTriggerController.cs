@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class GazeTriggerController : MonoBehaviour {
@@ -10,7 +8,7 @@ public class GazeTriggerController : MonoBehaviour {
     public Color loadingColor = Color.blue;
     public Color completeColor = Color.green;
 
-    Image image;
+    Image imageComponent;
     bool isLoading;
     float startTime;
     public delegate void OnEnterDelegate();
@@ -21,18 +19,19 @@ public class GazeTriggerController : MonoBehaviour {
     OnExitDelegate onExitDelegate;
 
     void Start() {
-        GameObject baseGameObject = transform.Find("Base").gameObject;
-        baseGameObject.GetComponent<MeshRenderer>().material.color = baseColor;
-        GameObject imageObject = transform.Find("Canvas/Image").gameObject;
-        image = imageObject.GetComponent<Image>();
+        GameObject baseObj = transform.Find("GazeTriggerBase").gameObject;
+        GameObject canvasObj = transform.Find("GazeTriggerLoadingCanvas").gameObject;
+        GameObject imageObj = canvasObj.transform.Find("GazeTriggerLoadingImage").gameObject;
+        baseObj.GetComponent<MeshRenderer>().material.color = baseColor;
+        imageComponent = imageObj.GetComponent<Image>();
         isLoading = false;
     }
 
     void FixedUpdate() {
-        if (isLoading && image.fillAmount < 1) {
-            image.fillAmount = (Time.time - startTime) / gazeTime;
-            if (image.fillAmount >= 1) {
-                image.color = completeColor;
+        if (isLoading && imageComponent.fillAmount < 1) {
+            imageComponent.fillAmount = (Time.time - startTime) / gazeTime;
+            if (imageComponent.fillAmount >= 1) {
+                imageComponent.color = completeColor;
                 onTriggerDelegate();
             }
         }
@@ -40,14 +39,14 @@ public class GazeTriggerController : MonoBehaviour {
 
     public void OnEnter() {
         isLoading = true;
-        image.color = loadingColor;
+        imageComponent.color = loadingColor;
         startTime = Time.time;
         onEnterDelegate();
     }
 
     public void OnExit() {
         isLoading = false;
-        image.fillAmount = 0.0f;
+        imageComponent.fillAmount = 0.0f;
         onExitDelegate();
     }
 
