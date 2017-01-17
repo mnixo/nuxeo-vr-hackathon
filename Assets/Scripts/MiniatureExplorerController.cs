@@ -8,15 +8,16 @@ public class MiniatureExplorerController : MonoBehaviour {
 
 	void Start() {
         float distance = 4.5f;
-        float vAngleIncrement = 18 * Mathf.Deg2Rad;
-        float hAngleIncrement = 20 * Mathf.Deg2Rad;
-        //float vAngle;
-        //float hAngle;
+        float vAngleIncrement = 18.0f;
+        float hAngleIncrement = 20.0f;
+        float vAngleInital = -8.0f;
+        int rows = 3;
+        int columns = 2;
         GameObject obj;
 
         //hAngle = hAngleIncrement * 0;
 
-        for (float hAngle = -hAngleIncrement * 2; hAngle < hAngleIncrement * 3; hAngle += hAngleIncrement) {
+        /*for (float hAngle = -hAngleIncrement * 2; hAngle < hAngleIncrement * 3; hAngle += hAngleIncrement) {
             for (float vAngle = 0.0f; vAngle < vAngleIncrement * 3; vAngle += vAngleIncrement) {
                 obj = Instantiate(miniaturePrefab);
                 obj.transform.parent = transform;
@@ -24,35 +25,18 @@ public class MiniatureExplorerController : MonoBehaviour {
                 obj.transform.eulerAngles = new Vector3(-vAngle * Mathf.Rad2Deg, 0.0f, 0.0f);
                 obj.transform.RotateAround(Vector3.zero, Vector3.up, hAngle * Mathf.Rad2Deg);
             }
+        }*/
+
+        for (int r = rows - 1; r >= 0; r--) {
+            for (int c = -columns; c <= columns; c++) {
+                obj = Instantiate(miniaturePrefab);
+                obj.transform.parent = transform;
+                obj.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
+                obj.transform.RotateAround(Vector3.zero, Vector3.left, r * vAngleIncrement + vAngleInital);
+                obj.transform.RotateAround(Vector3.zero, Vector3.up, c * hAngleIncrement);
+            }
         }
 
-        /*vAngle = vAngleIncrement * 0;
-        obj = Instantiate(miniaturePrefab);
-        obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3(0.0f, Mathf.Sin(vAngle) * distance, Mathf.Cos(vAngle) * distance);
-        obj.transform.eulerAngles = new Vector3(-vAngle * Mathf.Rad2Deg, 0.0f, 0.0f);
-        obj.transform.RotateAround(Vector3.zero, Vector3.up, hAngle * Mathf.Rad2Deg);
-
-        vAngle = vAngleIncrement * 1;
-        obj = Instantiate(miniaturePrefab);
-        obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3(0.0f, Mathf.Sin(vAngle) * distance, Mathf.Cos(vAngle) * distance);
-        obj.transform.eulerAngles = new Vector3(-vAngle * Mathf.Rad2Deg, 0.0f, 0.0f);
-        obj.transform.RotateAround(Vector3.zero, Vector3.up, hAngle * Mathf.Rad2Deg);
-
-        vAngle = vAngleIncrement * 2;
-        obj = Instantiate(miniaturePrefab);
-        obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3(0.0f, Mathf.Sin(vAngle) * distance, Mathf.Cos(vAngle) * distance);
-        obj.transform.eulerAngles = new Vector3(-vAngle * Mathf.Rad2Deg, 0.0f, 0.0f);
-        obj.transform.RotateAround(Vector3.zero, Vector3.up, hAngle * Mathf.Rad2Deg);
-
-        vAngle = vAngleIncrement * 3;
-        obj = Instantiate(miniaturePrefab);
-        obj.transform.parent = transform;
-        obj.transform.localPosition = new Vector3(0.0f, Mathf.Sin(vAngle) * distance, Mathf.Cos(vAngle) * distance);
-        obj.transform.eulerAngles = new Vector3(-vAngle * Mathf.Rad2Deg, 0.0f, 0.0f);
-        obj.transform.RotateAround(Vector3.zero, Vector3.up, hAngle * Mathf.Rad2Deg);*/
 	}
 	
 }
