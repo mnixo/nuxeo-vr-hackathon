@@ -18,7 +18,7 @@ public class GazeTriggerController : MonoBehaviour {
     OnTriggerDelegate onTriggerDelegate;
     OnExitDelegate onExitDelegate;
 
-    void Start() {
+    void Awake() {
         GameObject baseObj = transform.Find("GazeTriggerBase").gameObject;
         GameObject canvasObj = transform.Find("GazeTriggerLoadingCanvas").gameObject;
         GameObject imageObj = canvasObj.transform.Find("GazeTriggerLoadingImage").gameObject;

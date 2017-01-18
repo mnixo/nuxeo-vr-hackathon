@@ -41,6 +41,14 @@ public class MiniatureController : MonoBehaviour {
         url = val;
     }
 
+    public void enable() {
+        trigger.enabled = true;
+    }
+
+    public void disable() {
+        trigger.enabled = false;
+    }
+
     void onTriggerEnter() {
         
     }

@@ -12,16 +12,17 @@ public class MiniatureExplorerController : MonoBehaviour {
     float vAngleInitial = -8.0f;
     int rows = 3;
     int columns = 2;
-    string baseUrl = "https://nightly.nuxeo.com/";
-    string apiPathRoot = "nuxeo/api/v1/path/";
+    string baseUrl = "https://nightly.nuxeo.com/nuxeo/";
+    string apiPathRoot = "api/v1/path/";
     GameObject current;
     List<GameObject> children;
 
-	void Start() {
+	void Awake() {
         current = Instantiate(miniaturePrefab);
         current.transform.parent = transform;
         current.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
         current.transform.RotateAround(Vector3.zero, Vector3.left, rows * vAngleIncrement + vAngleInitial);
+        current.GetComponent<MiniatureController>().enable();
         current.GetComponent<MiniatureController>().setText("ROOT");
         current.GetComponent<MiniatureController>().setImage("domain");
         current.GetComponent<MiniatureController>().setExplorer(this);
@@ -35,6 +36,7 @@ public class MiniatureExplorerController : MonoBehaviour {
                 obj.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
                 obj.transform.RotateAround(Vector3.zero, Vector3.left, r * vAngleIncrement + vAngleInitial);
                 obj.transform.RotateAround(Vector3.zero, Vector3.up, c * hAngleIncrement);
+                obj.GetComponent<MiniatureController>().disable();
                 obj.GetComponent<MiniatureController>().setText("");
                 obj.GetComponent<MiniatureController>().setImage(null);
                 obj.GetComponent<MiniatureController>().setExplorer(this);
@@ -56,11 +58,13 @@ public class MiniatureExplorerController : MonoBehaviour {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
             System.Text.Encoding.ASCII.GetBytes("Administrator:Administrator")));
+        headers.Add("X-NXproperties", "*");
         StartCoroutine(WaitForRequest(new WWW(url, null, headers)));
     }
 
     public void triggerMiniature(MiniatureController miniature) {
         makeRequest(miniature.getUrl());
+        makeRequest(miniature.getUrl() + "@children");
     }
 	
 }
