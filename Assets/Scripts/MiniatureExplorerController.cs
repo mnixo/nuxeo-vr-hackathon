@@ -13,20 +13,22 @@ public class MiniatureExplorerController : MonoBehaviour {
     int rows = 3;
     int columns = 2;
     string baseUrl = "https://nightly.nuxeo.com/nuxeo/";
-    string apiPathRoot = "api/v1/path/";
     GameObject current;
     List<GameObject> children;
+
+    delegate void Callback(string json);
 
 	void Awake() {
         current = Instantiate(miniaturePrefab);
         current.transform.parent = transform;
         current.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
         current.transform.RotateAround(Vector3.zero, Vector3.left, rows * vAngleIncrement + vAngleInitial);
-        current.GetComponent<MiniatureController>().enable();
-        current.GetComponent<MiniatureController>().setText("ROOT");
-        current.GetComponent<MiniatureController>().setImage("domain");
+        NuxeoEntity dummyRoot = new NuxeoEntity();
+        dummyRoot.title = "START";
+        dummyRoot.entityUrl = baseUrl + "api/v1/path/";
+        dummyRoot.childrenUrl = baseUrl + "api/v1/path/@children";
+        current.GetComponent<MiniatureController>().setEntity(dummyRoot);
         current.GetComponent<MiniatureController>().setExplorer(this);
-        current.GetComponent<MiniatureController>().setUrl(baseUrl + apiPathRoot);
         children = new List<GameObject>();
         GameObject obj;
         for (int r = rows - 1; r >= 0; r--) {
@@ -36,35 +38,58 @@ public class MiniatureExplorerController : MonoBehaviour {
                 obj.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
                 obj.transform.RotateAround(Vector3.zero, Vector3.left, r * vAngleIncrement + vAngleInitial);
                 obj.transform.RotateAround(Vector3.zero, Vector3.up, c * hAngleIncrement);
-                obj.GetComponent<MiniatureController>().disable();
-                obj.GetComponent<MiniatureController>().setText("");
-                obj.GetComponent<MiniatureController>().setImage(null);
+                obj.GetComponent<MiniatureController>().setEntity(null);
                 obj.GetComponent<MiniatureController>().setExplorer(this);
                 children.Add(obj);
             }
         }
 	}
 
-    IEnumerator WaitForRequest(WWW www) {
+    IEnumerator WaitForRequest(WWW www, Callback cb) {
         yield return www;
         if (www.error == null) {
-            Debug.Log(www.text);
+            //Debug.Log(www.text);
+            cb(www.text);
         } else {
-            Debug.Log(www.error);
+            //Debug.Log(www.error);
         }
     }
 
-    void makeRequest(string url) {
+    void makeRequest(string url, Callback cb) {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
             System.Text.Encoding.ASCII.GetBytes("Administrator:Administrator")));
         headers.Add("X-NXproperties", "*");
-        StartCoroutine(WaitForRequest(new WWW(url, null, headers)));
+        StartCoroutine(WaitForRequest(new WWW(url, null, headers), cb));
+    }
+
+    void updateCurrent(string json) {
+        JSONObject obj = new JSONObject(json);
+        NuxeoEntity entity = new NuxeoEntity(obj, baseUrl);
+        if (entity.parentRef.Equals("/")) {
+            entity.entityUrl = baseUrl + "api/v1/path" + entity.parentRef;
+        } else {
+            entity.entityUrl = baseUrl + "api/v1/id/" + entity.parentRef + "/";
+        }
+        entity.childrenUrl = entity.entityUrl + "@children";
+        current.GetComponent<MiniatureController>().setEntity(entity);
+    }
+
+    void updateChildren(string json) {
+        JSONObject wrapper = new JSONObject(json);
+        List<JSONObject> entries = wrapper.GetField("entries").list;
+        for (int i = 0; i < entries.Count; i++) {
+            NuxeoEntity entity = new NuxeoEntity(entries[i], baseUrl);
+            children[i].GetComponent<MiniatureController>().setEntity(entity);
+        }
+        for (int i = entries.Count; i < children.Count; i++) {
+            children[i].GetComponent<MiniatureController>().setEntity(null);
+        }
     }
 
     public void triggerMiniature(MiniatureController miniature) {
-        makeRequest(miniature.getUrl());
-        makeRequest(miniature.getUrl() + "@children");
+        makeRequest(miniature.getEntity().entityUrl, updateCurrent);
+        makeRequest(miniature.getEntity().childrenUrl, updateChildren);
     }
 	
 }
