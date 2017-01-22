@@ -25,6 +25,7 @@ public class MiniatureExplorerController : MonoBehaviour {
         current.transform.RotateAround(Vector3.zero, Vector3.left, rows * vAngleIncrement + vAngleInitial);
         NuxeoEntity dummyRoot = new NuxeoEntity();
         dummyRoot.title = "START";
+        dummyRoot.type = "Domain";
         dummyRoot.entityUrl = baseUrl + "api/v1/path/";
         dummyRoot.childrenUrl = baseUrl + "api/v1/path/@children";
         current.GetComponent<MiniatureController>().setEntity(dummyRoot);

@@ -27,11 +27,27 @@ public class MiniatureController : MonoBehaviour {
         this.entity = entity;
         trigger.enabled = entity != null;
         image.enabled = entity != null;
-        image.sprite = entity != null ? Resources.Load<Sprite>("Icons/domain") : null;
+        image.sprite = entity != null ? getSpriteFromEntityType(entity.type) : null;
         if (entity != null) {
             text.text = entity.type != "Root" ? entity.title : entity.type;
         } else {
             text.text = null;
+        }
+    }
+
+    private Sprite getSpriteFromEntityType(string type) {
+        switch (type) {
+            case "Root":
+            case "Domain":
+                return Resources.Load<Sprite>("Icons/domain");
+            case "SectionRoot":
+            case "TemplateRoot":
+            case "WorkspaceRoot":
+            case "Workspace":
+                return Resources.Load<Sprite>("Icons/workspace");
+            default:
+                return Resources.Load<Sprite>("Icons/file");
+
         }
     }
 
