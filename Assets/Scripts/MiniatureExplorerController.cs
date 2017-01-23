@@ -12,13 +12,17 @@ public class MiniatureExplorerController : MonoBehaviour {
     float vAngleInitial = -8.0f;
     int rows = 3;
     int columns = 2;
+    string serverInfoUrl = "https://gist.githubusercontent.com/mnixo/a4ed773a84e6548ca19ce756fcda48bc/raw";
     string baseUrl = "https://nightly.nuxeo.com/nuxeo/";
+    string username = "Administrator";
+    string password = "Administrator";
     GameObject current;
     List<GameObject> children;
 
     delegate void Callback(string json);
 
 	void Awake() {
+        makeRequest(serverInfoUrl, updateServerInfo);
         current = Instantiate(miniaturePrefab);
         current.transform.parent = transform;
         current.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
@@ -56,12 +60,23 @@ public class MiniatureExplorerController : MonoBehaviour {
         }
     }
 
-    void makeRequest(string url, Callback cb) {
+    void makeNuxeoApiRequest(string url, Callback cb) {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes("Administrator:Administrator")));
+            System.Text.Encoding.ASCII.GetBytes(username + ":" + password)));
         headers.Add("X-NXproperties", "*");
         StartCoroutine(WaitForRequest(new WWW(url, null, headers), cb));
+    }
+
+    void makeRequest(string url, Callback cb) {
+        StartCoroutine(WaitForRequest(new WWW(url, null, new Dictionary<string, string>()), cb));
+    }
+
+    void updateServerInfo(string json) {
+        JSONObject obj = new JSONObject(json);
+        baseUrl = obj.GetField("server").str;
+        username = obj.GetField("username").str;
+        password = obj.GetField("password").str;
     }
 
     void updateCurrent(string json) {
@@ -89,8 +104,8 @@ public class MiniatureExplorerController : MonoBehaviour {
     }
 
     public void triggerMiniature(MiniatureController miniature) {
-        makeRequest(miniature.getEntity().entityUrl, updateCurrent);
-        makeRequest(miniature.getEntity().childrenUrl, updateChildren);
+        makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
+        makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
     }
 	
 }
