@@ -7,17 +7,24 @@ public class MiniatureController : MonoBehaviour {
 
     Text text;
     Image image;
+    RectTransform imageTransform;
     MiniatureExplorerController explorer;
     GazeTriggerController trigger;
+    float iconAngleValue = 0.0f;
 
     NuxeoEntity entity;
 
 	void Awake() {
         text = transform.Find("MiniatureHeader/MiniatureTitleCanvas/MiniatureTitleText").GetComponent<Text>();
         image = transform.Find("MiniatureIconCanvas/MiniatureIconImage").GetComponent<Image>();
+        imageTransform = transform.Find("MiniatureIconCanvas/MiniatureIconImage").GetComponent<RectTransform>();
         trigger = transform.Find("MiniatureGazeTrigger").GetComponent<GazeTriggerController>();
         trigger.setCallbacks(onTriggerEnter, onTriggerComplete, onTriggerExit);
 	}
+
+    void FixedUpdate() {
+        imageTransform.localEulerAngles = new Vector3(0.0f, 0.0f, Mathf.Sin(iconAngleValue += 0.05f) * 20);
+    }
 
     public NuxeoEntity getEntity() {
         return entity;
@@ -45,6 +52,14 @@ public class MiniatureController : MonoBehaviour {
             case "WorkspaceRoot":
             case "Workspace":
                 return Resources.Load<Sprite>("Icons/workspace");
+            case "Folder":
+                return Resources.Load<Sprite>("Icons/folder");
+            case "Note":
+                return Resources.Load<Sprite>("Icons/note");
+            case "Picture":
+                return Resources.Load<Sprite>("Icons/picture");
+            case "Video":
+                return Resources.Load<Sprite>("Icons/Video");
             default:
                 return Resources.Load<Sprite>("Icons/file");
 

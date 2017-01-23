@@ -53,10 +53,10 @@ public class MiniatureExplorerController : MonoBehaviour {
     IEnumerator WaitForRequest(WWW www, Callback cb) {
         yield return www;
         if (www.error == null) {
-            //Debug.Log(www.text);
+            Debug.Log(www.text);
             cb(www.text);
         } else {
-            //Debug.Log(www.error);
+            Debug.Log(www.error);
         }
     }
 
