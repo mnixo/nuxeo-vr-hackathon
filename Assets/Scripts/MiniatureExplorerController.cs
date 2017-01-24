@@ -32,6 +32,7 @@ public class MiniatureExplorerController : MonoBehaviour {
         dummyRoot = new NuxeoEntity();
         dummyRoot.title = "START";
         dummyRoot.type = "Domain";
+        dummyRoot.facets = new List<string> { "Folderish" };
         dummyRoot.entityUrl = baseUrl + "api/v1/path/";
         dummyRoot.childrenUrl = baseUrl + "api/v1/path/@children";
         current.GetComponent<MiniatureController>().setEntity(dummyRoot);
@@ -101,18 +102,20 @@ public class MiniatureExplorerController : MonoBehaviour {
     void updateChildren(string json) {
         JSONObject wrapper = new JSONObject(json);
         List<JSONObject> entries = wrapper.GetField("entries").list;
-        for (int i = 0; i < entries.Count; i++) {
-            NuxeoEntity entity = new NuxeoEntity(entries[i], baseUrl);
+        for (int i = 0; i < children.Count; i++) {
+            NuxeoEntity entity = null;
+            if (i < entries.Count) {
+                entity = new NuxeoEntity(entries[i], baseUrl);
+            }
             children[i].GetComponent<MiniatureController>().setEntity(entity);
-        }
-        for (int i = entries.Count; i < children.Count; i++) {
-            children[i].GetComponent<MiniatureController>().setEntity(null);
         }
     }
 
     public void triggerMiniature(MiniatureController miniature) {
-        makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
-        makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
+        if (miniature.getEntity().facets.Contains("Folderish")) {
+            makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
+            makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
+        }
     }
 	
 }
