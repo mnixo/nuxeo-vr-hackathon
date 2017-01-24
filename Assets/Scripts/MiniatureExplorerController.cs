@@ -16,18 +16,20 @@ public class MiniatureExplorerController : MonoBehaviour {
     string baseUrl = "https://nightly.nuxeo.com/nuxeo/";
     string username = "Administrator";
     string password = "Administrator";
+    NuxeoEntity dummyRoot;
     GameObject current;
     List<GameObject> children;
 
     delegate void Callback(string json);
 
 	void Awake() {
+        Caching.CleanCache();
         makeRequest(serverInfoUrl, updateServerInfo);
         current = Instantiate(miniaturePrefab);
         current.transform.parent = transform;
         current.transform.localPosition = new Vector3(0.0f, 0.0f, distance);
         current.transform.RotateAround(Vector3.zero, Vector3.left, rows * vAngleIncrement + vAngleInitial);
-        NuxeoEntity dummyRoot = new NuxeoEntity();
+        dummyRoot = new NuxeoEntity();
         dummyRoot.title = "START";
         dummyRoot.type = "Domain";
         dummyRoot.entityUrl = baseUrl + "api/v1/path/";
@@ -77,6 +79,11 @@ public class MiniatureExplorerController : MonoBehaviour {
         baseUrl = obj.GetField("server").str;
         username = obj.GetField("username").str;
         password = obj.GetField("password").str;
+        dummyRoot.entityUrl = baseUrl + "api/v1/path/";
+        dummyRoot.childrenUrl = baseUrl + "api/v1/path/@children";
+        Debug.Log("Server URL: " + baseUrl + "\n" + 
+                  "- Username: " + username + "\n" + 
+                  "- Password: " + password);
     }
 
     void updateCurrent(string json) {
