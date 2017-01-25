@@ -9,35 +9,33 @@ public class PowerGloveController : MonoBehaviour {
     public MiniatureExplorerController explorerController;
 
     NuxeoEntity entity;
+    float val = 0.0f;
 
 	void Awake() {
 		
 	}
+
+    void FixedUpdate() {
+        transform.localPosition = new Vector3(
+            0.1f + Mathf.Sin(val) * 0.02f, 
+            transform.localPosition.y,
+            transform.localPosition.z
+        );
+        transform.localEulerAngles = new Vector3(0.0f, Mathf.Sin(val) * 5, Mathf.Sin(val) * 5);
+        val += 0.02f;
+    }
 
     public void setEntity(NuxeoEntity entity) {
         foreach (Transform child in transform) {
             Destroy(child.gameObject);
         }
         this.entity = entity;
-        StartCoroutine(test(entity.fileDataUrl));
-    }
-
-    IEnumerator test(string url) {
-        Texture2D tex;
-        tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
-        Dictionary<string, string> headers = new Dictionary<string, string>();
-        headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
-            System.Text.Encoding.ASCII.GetBytes("Administrator" + ":" + "Nuxeo2015")));
-        headers.Add("X-NXproperties", "*");
-        WWW www = new WWW(url, null, headers);
-        yield return www;
-        www.LoadImageIntoTexture(tex);
         GameObject obj = Instantiate(imagePreviewPrefab);
         obj.transform.parent = transform;
         obj.transform.localPosition = new Vector3(-0.2f, 0.0f, 0.0f);
         obj.transform.localScale = Vector3.one;
         obj.transform.localRotation = Quaternion.Euler(10.0f, 30.0f, -10.0f);
-        obj.transform.Find("NuxeoImagePreviewRaw").gameObject.GetComponent<RawImage>().texture = tex;
+        obj.transform.Find("NuxeoImagePreviewRaw").gameObject.GetComponent<RawImage>().texture = entity.image;
     }
 	
 }

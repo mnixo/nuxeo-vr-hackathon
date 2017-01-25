@@ -16,6 +16,8 @@ public class NuxeoEntity {
     public string entityUrl;
     public string childrenUrl;
 
+    public Texture2D image; // for Picture documents
+
     public NuxeoEntity(JSONObject obj, string baseUrl) {
         
         entityType = obj.GetField("entity-type").str;

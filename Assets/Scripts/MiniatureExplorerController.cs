@@ -22,6 +22,7 @@ public class MiniatureExplorerController : MonoBehaviour {
     List<GameObject> children;
 
     delegate void Callback(string json);
+    delegate void UpdateGloveCallback(NuxeoEntity entity);
 
 	void Awake() {
         Caching.CleanCache();
@@ -64,6 +65,10 @@ public class MiniatureExplorerController : MonoBehaviour {
         }
     }
 
+    void makeRequest(string url, Callback cb) {
+        StartCoroutine(WaitForRequest(new WWW(url, null, new Dictionary<string, string>()), cb));
+    }
+
     void makeNuxeoApiRequest(string url, Callback cb) {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
@@ -72,8 +77,17 @@ public class MiniatureExplorerController : MonoBehaviour {
         StartCoroutine(WaitForRequest(new WWW(url, null, headers), cb));
     }
 
-    void makeRequest(string url, Callback cb) {
-        StartCoroutine(WaitForRequest(new WWW(url, null, new Dictionary<string, string>()), cb));
+    IEnumerator downloadDocumentImage(NuxeoEntity entity, UpdateGloveCallback cb) {
+        Texture2D tex = new Texture2D(4, 4, TextureFormat.DXT1, false);
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
+            System.Text.Encoding.ASCII.GetBytes(username + ":" + password)));
+        headers.Add("X-NXproperties", "*");
+        WWW www = new WWW(entity.fileDataUrl, null, headers);
+        yield return www;
+        www.LoadImageIntoTexture(tex);
+        entity.image = tex;
+        cb(entity);
     }
 
     void updateServerInfo(string json) {
@@ -112,12 +126,16 @@ public class MiniatureExplorerController : MonoBehaviour {
         }
     }
 
+    void updateGlove(NuxeoEntity entity) {
+        powerGloveController.setEntity(entity);
+    }
+
     public void triggerMiniature(MiniatureController miniature) {
         if (miniature.getEntity().facets.Contains("Folderish")) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
         } else if (miniature.getEntity().type == "Picture") {
-            powerGloveController.setEntity(miniature.getEntity());
+            StartCoroutine(downloadDocumentImage(miniature.getEntity(), updateGlove));
         }
     }
 	
