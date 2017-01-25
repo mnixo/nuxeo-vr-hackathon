@@ -5,6 +5,7 @@ using UnityEngine;
 public class MiniatureExplorerController : MonoBehaviour {
 
     public GameObject miniaturePrefab;
+    public PowerGloveController powerGloveController;
 
     float distance = 4.5f;
     float vAngleIncrement = 16.0f;
@@ -115,6 +116,8 @@ public class MiniatureExplorerController : MonoBehaviour {
         if (miniature.getEntity().facets.Contains("Folderish")) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
+        } else if (miniature.getEntity().type == "Picture") {
+            powerGloveController.setEntity(miniature.getEntity());
         }
     }
 	

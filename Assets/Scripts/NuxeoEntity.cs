@@ -11,6 +11,7 @@ public class NuxeoEntity {
     public string parentRef;
     public string title;
     public List<string> facets;
+    public string fileDataUrl;
 
     public string entityUrl;
     public string childrenUrl;
@@ -26,6 +27,13 @@ public class NuxeoEntity {
         facets = new List<string>();
         foreach (JSONObject facet in obj.GetField("facets").list) {
             facets.Add(facet.str);
+        }
+        if (obj.HasField("properties")) {
+            JSONObject properties = obj.GetField("properties");
+            if (properties.HasField("file:content")) {
+                JSONObject fileContent = properties.GetField("file:content");
+                fileDataUrl = fileContent.GetField("data").str;
+            }
         }
         entityUrl = baseUrl + "api/v1/id/" + uid;
         childrenUrl = entityUrl + "/@children";
