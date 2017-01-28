@@ -60,6 +60,8 @@ public class MiniatureController : MonoBehaviour {
                 return Resources.Load<Sprite>("Icons/picture");
             case "Video":
                 return Resources.Load<Sprite>("Icons/Video");
+            case "3D":
+                return Resources.Load<Sprite>("Icons/3d");    
             default:
                 return Resources.Load<Sprite>("Icons/file");
 

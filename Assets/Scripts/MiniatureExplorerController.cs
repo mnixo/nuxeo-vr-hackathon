@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public class MiniatureExplorerController : MonoBehaviour {
@@ -90,6 +92,42 @@ public class MiniatureExplorerController : MonoBehaviour {
         cb(entity);
     }
 
+    IEnumerator downloadDocumentModel(NuxeoEntity entity, UpdateGloveCallback cb) {
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
+            System.Text.Encoding.ASCII.GetBytes(username + ":" + password)));
+        headers.Add("X-NXproperties", "*");
+        WWW www = new WWW(entity.fileDataUrl, null, headers);
+        yield return www;
+        Debug.Log(www.text);
+        FileStream file = File.Create(Application.persistentDataPath + "/model");
+        BinaryFormatter bf = new BinaryFormatter();
+        bf.Serialize(file, www.text);
+        file.Close();
+        GameObject obj = OBJLoader.LoadOBJFile(Application.persistentDataPath + "/model");
+        Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+        foreach (Transform child in obj.transform) {
+            Bounds childBB = child.GetComponent<MeshFilter>().mesh.bounds;
+            min.x = Mathf.Min(min.x, childBB.min.x);
+            min.y = Mathf.Min(min.y, childBB.min.y);
+            min.z = Mathf.Min(min.z, childBB.min.z);
+            max.x = Mathf.Max(max.x, childBB.max.x);
+            max.y = Mathf.Max(max.y, childBB.max.y);
+            max.z = Mathf.Max(max.z, childBB.max.z);
+        }
+        Vector3 center = max - min;
+        foreach (Transform child in obj.transform) {
+            child.localScale = Vector3.one;
+            child.localPosition -= max - (center / 2);
+        }
+        obj.transform.parent = transform;
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localScale *= 1 / Mathf.Max(Mathf.Max(center.x, center.y), center.z);
+        entity.model = obj;
+        cb(entity);
+    }
+
     void updateServerInfo(string json) {
         JSONObject obj = new JSONObject(json);
         baseUrl = obj.GetField("server").str;
@@ -131,11 +169,13 @@ public class MiniatureExplorerController : MonoBehaviour {
     }
 
     public void triggerMiniature(MiniatureController miniature) {
-        if (miniature.getEntity().facets.Contains("Folderish")) {
+        if (miniature.getEntity().isFolderish()) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
-        } else if (miniature.getEntity().type == "Picture") {
+        } else if (miniature.getEntity().isPicture()) {
             StartCoroutine(downloadDocumentImage(miniature.getEntity(), updateGlove));
+        } else if (miniature.getEntity().is3d()) {
+            StartCoroutine(downloadDocumentModel(miniature.getEntity(), updateGlove));
         }
     }
 	

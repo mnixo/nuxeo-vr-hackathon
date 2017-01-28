@@ -17,6 +17,7 @@ public class NuxeoEntity {
     public string childrenUrl;
 
     public Texture2D image; // for Picture documents
+    public GameObject model; // for 3D documents
 
     public NuxeoEntity(JSONObject obj, string baseUrl) {
         
@@ -37,6 +38,9 @@ public class NuxeoEntity {
                 fileDataUrl = fileContent.GetField("data").str;
             }
         }
+        if (is3d()) {
+            type = "3D";
+        }
         entityUrl = baseUrl + "api/v1/id/" + uid;
         childrenUrl = entityUrl + "/@children";
 
@@ -44,6 +48,22 @@ public class NuxeoEntity {
 
     public NuxeoEntity() {
 
+    }
+
+    public bool isFolderish() {
+        return facets.Contains("Folderish");
+    }
+
+    public bool isPicture() {
+        return type.Equals("Picture");
+    }
+
+    public bool is3d() {
+        if (fileDataUrl == null) {
+            return false;
+        }
+        System.StringComparison sc = System.StringComparison.Ordinal;
+        return fileDataUrl.EndsWith(".obj", sc) || fileDataUrl.EndsWith(".stl", sc);
     }
 
 }
