@@ -15,13 +15,11 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 #endif
 
-public class OBJLoader
-{
+public class OBJLoader {
     public static bool splitByMaterial = false;
     public static string[] searchPaths = new string[] { "", "%FileName%_Textures" + Path.DirectorySeparatorChar };
     //structures
-    struct OBJFace
-    {
+    struct OBJFace {
         public string materialName;
         public string meshName;
         public int[] indexes;
@@ -31,113 +29,85 @@ public class OBJLoader
     //functions
 #if UNITY_EDITOR
     [MenuItem("GameObject/Import From OBJ")]
-    static void ObjLoadMenu()
-    {
+    static void ObjLoadMenu() {
         string pth = UnityEditor.EditorUtility.OpenFilePanel("Import OBJ", "", "obj");
-        if (!string.IsNullOrEmpty(pth))
-        {
+        if (!string.IsNullOrEmpty(pth)) {
             System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
             s.Start();
             LoadOBJFile(pth);
             Debug.Log("OBJ load took " + s.ElapsedMilliseconds + "ms");
             s.Stop();
         }
-        }
+    }
 #endif
 
-    public static Vector3 ParseVectorFromCMPS(string[] cmps)
-    {
+    public static Vector3 ParseVectorFromCMPS(string[] cmps) {
         float x = float.Parse(cmps[1]);
         float y = float.Parse(cmps[2]);
-        if (cmps.Length == 4)
-        {
+        if (cmps.Length == 4) {
             float z = float.Parse(cmps[3]);
             return new Vector3(x, y, z);
         }
         return new Vector2(x, y);
     }
-    public static Color ParseColorFromCMPS(string[] cmps,float scalar = 1.0f)
-    {
-        float Kr = float.Parse(cmps[1]) * scalar ;
+    public static Color ParseColorFromCMPS(string[] cmps, float scalar = 1.0f) {
+        float Kr = float.Parse(cmps[1]) * scalar;
         float Kg = float.Parse(cmps[2]) * scalar;
         float Kb = float.Parse(cmps[3]) * scalar;
         return new Color(Kr, Kg, Kb);
     }
 
-    public static string OBJGetFilePath(string path, string basePath, string fileName)
-    {
-        foreach (string sp in searchPaths)
-        {
+    public static string OBJGetFilePath(string path, string basePath, string fileName) {
+        foreach (string sp in searchPaths) {
             string s = sp.Replace("%FileName%", fileName);
-            if (File.Exists(basePath + s + path))
-            {
+            if (File.Exists(basePath + s + path)) {
                 return basePath + s + path;
-            }
-            else if (File.Exists(path))
-            {
+            } else if (File.Exists(path)) {
                 return path;
             }
         }
 
         return null;
     }
-    public static Material[] LoadMTLFile(string fn)
-    {
+    public static Material[] LoadMTLFile(string fn) {
         Material currentMaterial = null;
         List<Material> matlList = new List<Material>();
         FileInfo mtlFileInfo = new FileInfo(fn);
         string baseFileName = Path.GetFileNameWithoutExtension(fn);
         string mtlFileDirectory = mtlFileInfo.Directory.FullName + Path.DirectorySeparatorChar;
-        foreach (string ln in File.ReadAllLines(fn))
-        {
+        foreach (string ln in File.ReadAllLines(fn)) {
             string l = ln.Trim().Replace("  ", " ");
             string[] cmps = l.Split(' ');
             string data = l.Remove(0, l.IndexOf(' ') + 1);
 
-            if (cmps[0] == "newmtl")
-            {
-                if (currentMaterial != null)
-                {
+            if (cmps[0] == "newmtl") {
+                if (currentMaterial != null) {
                     matlList.Add(currentMaterial);
                 }
                 currentMaterial = new Material(Shader.Find("Standard (Specular setup)"));
                 currentMaterial.name = data;
-            }
-            else if (cmps[0] == "Kd")
-            {
-                currentMaterial.SetColor("_Color",ParseColorFromCMPS(cmps));
-            }
-            else if (cmps[0] == "map_Kd")
-            {
+            } else if (cmps[0] == "Kd") {
+                currentMaterial.SetColor("_Color", ParseColorFromCMPS(cmps));
+            } else if (cmps[0] == "map_Kd") {
                 //TEXTURE
-                string fpth = OBJGetFilePath(data, mtlFileDirectory,baseFileName);
+                string fpth = OBJGetFilePath(data, mtlFileDirectory, baseFileName);
                 if (fpth != null)
-                    currentMaterial.SetTexture("_MainTex",TextureLoader.LoadTexture(fpth));
-            }
-            else if (cmps[0] == "map_Bump")
-            {
+                    currentMaterial.SetTexture("_MainTex", TextureLoader.LoadTexture(fpth));
+            } else if (cmps[0] == "map_Bump") {
                 //TEXTURE
-                string fpth = OBJGetFilePath(data, mtlFileDirectory,baseFileName);
-                if (fpth != null)
-                {
+                string fpth = OBJGetFilePath(data, mtlFileDirectory, baseFileName);
+                if (fpth != null) {
                     currentMaterial.SetTexture("_BumpMap", TextureLoader.LoadTexture(fpth, true));
                     currentMaterial.EnableKeyword("_NORMALMAP");
                 }
-            }
-            else if (cmps[0] == "Ks")
-            {
+            } else if (cmps[0] == "Ks") {
                 currentMaterial.SetColor("_SpecColor", ParseColorFromCMPS(cmps));
-            }
-            else if (cmps[0] == "Ka")
-            {
+            } else if (cmps[0] == "Ka") {
                 currentMaterial.SetColor("_EmissionColor", ParseColorFromCMPS(cmps, 0.05f));
                 currentMaterial.EnableKeyword("_EMISSION");
-            }
-            else if (cmps[0] == "d")
-            {
+            } else if (cmps[0] == "d") {
                 float visibility = float.Parse(cmps[1]);
-                if (visibility < 1)
-                {
+                if (visibility < 1) {
                     Color temp = currentMaterial.color;
 
                     temp.a = visibility;
@@ -154,24 +124,20 @@ public class OBJLoader
                     currentMaterial.renderQueue = 3000;
                 }
 
-            }
-            else if (cmps[0] == "Ns")
-            {
+            } else if (cmps[0] == "Ns") {
                 float Ns = float.Parse(cmps[1]);
                 Ns = (Ns / 1000);
                 currentMaterial.SetFloat("_Glossiness", Ns);
 
             }
         }
-        if(currentMaterial != null)
-        {
+        if (currentMaterial != null) {
             matlList.Add(currentMaterial);
         }
         return matlList.ToArray();
     }
 
-    public static GameObject LoadOBJFile(string fn)
-    {
+    public static GameObject LoadOBJFile(string fn) {
 
         string meshName = Path.GetFileNameWithoutExtension(fn);
 
@@ -187,7 +153,7 @@ public class OBJLoader
         //MESH CONSTRUCTION
         List<string> materialNames = new List<string>();
         List<string> objectNames = new List<string>();
-        Dictionary<string,int> hashtable = new Dictionary<string, int>();
+        Dictionary<string, int> hashtable = new Dictionary<string, int>();
         List<OBJFace> faceList = new List<OBJFace>();
         string cmaterial = "";
         string cmesh = "default";
@@ -195,138 +161,100 @@ public class OBJLoader
         Material[] materialCache = null;
         //save this info for later
         FileInfo OBJFileInfo = new FileInfo(fn);
-         
-        foreach (string ln in File.ReadAllLines(fn))
-        {
-            if (ln.Length > 0 && ln[0] != '#')
-            {
-                string l = ln.Trim().Replace("  "," ");
+
+        foreach (string ln in File.ReadAllLines(fn)) {
+            if (ln.Length > 0 && ln[0] != '#') {
+                string l = ln.Trim().Replace("  ", " ");
                 string[] cmps = l.Split(' ');
                 string data = l.Remove(0, l.IndexOf(' ') + 1);
 
-                if (cmps[0] == "mtllib")
-                {
+                if (cmps[0] == "mtllib") {
                     //load cache
                     string pth = OBJGetFilePath(data, OBJFileInfo.Directory.FullName + Path.DirectorySeparatorChar, meshName);
                     if (pth != null)
                         materialCache = LoadMTLFile(pth);
 
-                }
-                else if ((cmps[0] == "g" || cmps[0] == "o") && splitByMaterial == false)
-                {
+                } else if ((cmps[0] == "g" || cmps[0] == "o") && splitByMaterial == false) {
                     cmesh = data;
-                    if (!objectNames.Contains(cmesh))
-                    {
+                    if (!objectNames.Contains(cmesh)) {
                         objectNames.Add(cmesh);
                     }
-                }
-                else if (cmps[0] == "usemtl")
-                {
+                } else if (cmps[0] == "usemtl") {
                     cmaterial = data;
-                    if (!materialNames.Contains(cmaterial))
-                    {
+                    if (!materialNames.Contains(cmaterial)) {
                         materialNames.Add(cmaterial);
                     }
 
-                    if (splitByMaterial)
-                    {
-                        if (!objectNames.Contains(cmaterial))
-                        {
+                    if (splitByMaterial) {
+                        if (!objectNames.Contains(cmaterial)) {
                             objectNames.Add(cmaterial);
                         }
                     }
-                }
-                else if (cmps[0] == "v")
-                {
+                } else if (cmps[0] == "v") {
                     //VERTEX
                     vertices.Add(ParseVectorFromCMPS(cmps));
-                }
-                else if (cmps[0] == "vn")
-                {
+                } else if (cmps[0] == "vn") {
                     //VERTEX NORMAL
                     normals.Add(ParseVectorFromCMPS(cmps));
-                }
-                else if (cmps[0] == "vt")
-                {
+                } else if (cmps[0] == "vt") {
                     //VERTEX UV
                     uvs.Add(ParseVectorFromCMPS(cmps));
-                }
-                else if (cmps[0] == "f")
-                {
+                } else if (cmps[0] == "f") {
                     int[] indexes = new int[cmps.Length - 1];
-                    for (int i = 1; i < cmps.Length ; i++)
-                    {
+                    for (int i = 1; i < cmps.Length; i++) {
                         string felement = cmps[i];
                         int vertexIndex = -1;
                         int normalIndex = -1;
                         int uvIndex = -1;
-                        if (felement.Contains("//"))
-                        {
+                        if (felement.Contains("//")) {
                             //doubleslash, no UVS.
                             string[] elementComps = felement.Split('/');
                             vertexIndex = int.Parse(elementComps[0]) - 1;
                             normalIndex = int.Parse(elementComps[2]) - 1;
-                        }
-                        else if (felement.Count(x => x == '/') == 2)
-                        {
+                        } else if (felement.Count(x => x == '/') == 2) {
                             //contains everything
                             string[] elementComps = felement.Split('/');
                             vertexIndex = int.Parse(elementComps[0]) - 1;
                             uvIndex = int.Parse(elementComps[1]) - 1;
                             normalIndex = int.Parse(elementComps[2]) - 1;
-                        }
-                        else if (!felement.Contains("/"))
-                        {
+                        } else if (!felement.Contains("/")) {
                             //just vertex inedx
                             vertexIndex = int.Parse(felement) - 1;
-                        }
-                        else
-                        {
+                        } else {
                             //vertex and uv
                             string[] elementComps = felement.Split('/');
                             vertexIndex = int.Parse(elementComps[0]) - 1;
                             uvIndex = int.Parse(elementComps[1]) - 1;
                         }
-                        string hashEntry = vertexIndex + "|" + normalIndex + "|" +uvIndex;
-                        if (hashtable.ContainsKey(hashEntry))
-                        {
+                        string hashEntry = vertexIndex + "|" + normalIndex + "|" + uvIndex;
+                        if (hashtable.ContainsKey(hashEntry)) {
                             indexes[i - 1] = hashtable[hashEntry];
-                        }
-                        else
-                        {
+                        } else {
                             //create a new hash entry
                             indexes[i - 1] = hashtable.Count;
                             hashtable[hashEntry] = hashtable.Count;
                             uvertices.Add(vertices[vertexIndex]);
-                            if (normalIndex < 0 || (normalIndex > (normals.Count - 1)))
-                            {
+                            if (normalIndex < 0 || (normalIndex > (normals.Count - 1))) {
                                 unormals.Add(Vector3.zero);
-                            }
-                            else
-                            {
+                            } else {
                                 hasNormals = true;
                                 unormals.Add(normals[normalIndex]);
                             }
-                            if (uvIndex < 0 || (uvIndex > (uvs.Count - 1)))
-                            {
+                            if (uvIndex < 0 || (uvIndex > (uvs.Count - 1))) {
                                 uuvs.Add(Vector2.zero);
-                            }
-                            else
-                            {
+                            } else {
                                 uuvs.Add(uvs[uvIndex]);
                             }
 
                         }
                     }
-                    if (indexes.Length < 5 && indexes.Length >= 3)
-                    {
+                    if (indexes.Length < 5 && indexes.Length >= 3) {
                         OBJFace f1 = new OBJFace();
                         f1.materialName = cmaterial;
                         f1.indexes = new int[] { indexes[0], indexes[1], indexes[2] };
                         f1.meshName = (splitByMaterial) ? cmaterial : cmesh;
                         faceList.Add(f1);
-                        if (indexes.Length > 3)
-                        {
+                        if (indexes.Length > 3) {
 
                             OBJFace f2 = new OBJFace();
                             f2.materialName = cmaterial;
@@ -341,13 +269,12 @@ public class OBJLoader
 
         if (objectNames.Count == 0)
             objectNames.Add("default");
-       
+
         //build objects
         GameObject parentObject = new GameObject(meshName);
-        
-        
-        foreach (string obj in objectNames)
-        {
+
+
+        foreach (string obj in objectNames) {
             GameObject subObject = new GameObject(obj);
             subObject.transform.parent = parentObject.transform;
             subObject.transform.localScale = new Vector3(-1, 1, 1);
@@ -359,19 +286,16 @@ public class OBJLoader
             List<Vector3> processedNormals = new List<Vector3>();
             List<Vector2> processedUVs = new List<Vector2>();
             List<int[]> processedIndexes = new List<int[]>();
-            Dictionary<int,int> remapTable = new Dictionary<int, int>();
+            Dictionary<int, int> remapTable = new Dictionary<int, int>();
             //POPULATE MESH
             List<string> meshMaterialNames = new List<string>();
 
-            OBJFace[] ofaces = faceList.Where(x =>  x.meshName == obj).ToArray();
-            foreach (string mn in materialNames)
-            {
+            OBJFace[] ofaces = faceList.Where(x => x.meshName == obj).ToArray();
+            foreach (string mn in materialNames) {
                 OBJFace[] faces = ofaces.Where(x => x.materialName == mn).ToArray();
-                if (faces.Length > 0)
-                {
+                if (faces.Length > 0) {
                     int[] indexes = new int[0];
-                    foreach (OBJFace f in faces)
-                    {
+                    foreach (OBJFace f in faces) {
                         int l = indexes.Length;
                         System.Array.Resize(ref indexes, l + f.indexes.Length);
                         System.Array.Copy(f.indexes, 0, indexes, l, f.indexes.Length);
@@ -380,17 +304,13 @@ public class OBJLoader
                     if (m.subMeshCount != meshMaterialNames.Count)
                         m.subMeshCount = meshMaterialNames.Count;
 
-                    for (int i = 0; i < indexes.Length; i++)
-                    {
+                    for (int i = 0; i < indexes.Length; i++) {
                         int idx = indexes[i];
                         //build remap table
-                        if (remapTable.ContainsKey(idx))
-                        {
+                        if (remapTable.ContainsKey(idx)) {
                             //ezpz
                             indexes[i] = remapTable[idx];
-                        }
-                        else
-                        {
+                        } else {
                             processedVertices.Add(uvertices[idx]);
                             processedNormals.Add(unormals[idx]);
                             processedUVs.Add(uuvs[idx]);
@@ -400,9 +320,7 @@ public class OBJLoader
                     }
 
                     processedIndexes.Add(indexes);
-                }
-                else
-                {
+                } else {
 
                 }
             }
@@ -412,14 +330,12 @@ public class OBJLoader
             m.normals = processedNormals.ToArray();
             m.uv = processedUVs.ToArray();
 
-            for (int i = 0; i < processedIndexes.Count; i++)
-            {
-                m.SetTriangles(processedIndexes[i],i);   
+            for (int i = 0; i < processedIndexes.Count; i++) {
+                m.SetTriangles(processedIndexes[i], i);
             }
 
-            if (!hasNormals)
-            {
-             m.RecalculateNormals();   
+            if (!hasNormals) {
+                m.RecalculateNormals();
             }
             m.RecalculateBounds();
             ;
@@ -428,25 +344,18 @@ public class OBJLoader
             MeshRenderer mr = subObject.AddComponent<MeshRenderer>();
 
             Material[] processedMaterials = new Material[meshMaterialNames.Count];
-            for(int i=0 ; i < meshMaterialNames.Count; i++)
-            {
-                
-                if (materialCache == null)
-                {
+            for (int i = 0; i < meshMaterialNames.Count; i++) {
+
+                if (materialCache == null) {
                     processedMaterials[i] = new Material(Shader.Find("Standard (Specular setup)"));
-                }
-                else
-                {
+                } else {
                     Material mfn = Array.Find(materialCache, x => x.name == meshMaterialNames[i]); ;
-                    if (mfn == null)
-                    {
+                    if (mfn == null) {
                         processedMaterials[i] = new Material(Shader.Find("Standard (Specular setup)"));
-                    }
-                    else
-                    {
+                    } else {
                         processedMaterials[i] = mfn;
                     }
-                    
+
                 }
                 processedMaterials[i].name = meshMaterialNames[i];
             }
@@ -457,5 +366,5 @@ public class OBJLoader
         }
 
         return parentObject;
-        }
     }
+}

@@ -10,18 +10,14 @@ using System.Collections;
 using System.IO;
 
 public class TextureLoader : MonoBehaviour {
-    public static Texture2D LoadTGA(string fileName)
-    {
-        using (var imageFile = File.OpenRead(fileName))
-        {
+    public static Texture2D LoadTGA(string fileName) {
+        using (var imageFile = File.OpenRead(fileName)) {
             return LoadTGA(imageFile);
         }
     }
 
-    public static Texture2D LoadDDSManual(string ddsPath)
-    {
-        try
-        {
+    public static Texture2D LoadDDSManual(string ddsPath) {
+        try {
 
             byte[] ddsBytes = File.ReadAllBytes(ddsPath);
 
@@ -34,14 +30,12 @@ public class TextureLoader : MonoBehaviour {
 
             byte DXTType = ddsBytes[87];
             TextureFormat textureFormat = TextureFormat.DXT5;
-            if (DXTType == 49)
-            {
+            if (DXTType == 49) {
                 textureFormat = TextureFormat.DXT1;
                 //	Debug.Log ("DXT1");
             }
 
-            if (DXTType == 53)
-            {
+            if (DXTType == 53) {
                 textureFormat = TextureFormat.DXT5;
                 //	Debug.Log ("DXT5");
             }
@@ -56,19 +50,15 @@ public class TextureLoader : MonoBehaviour {
             texture.name = finf.Name;
 
             return (texture);
-        }
-        catch (System.Exception ex)
-        {
+        } catch (System.Exception ex) {
             Debug.LogError("Error: Could not load DDS");
             return new Texture2D(8, 8);
         }
     }
 
-    public static void SetNormalMap(ref Texture2D tex)
-    {
+    public static void SetNormalMap(ref Texture2D tex) {
         Color[] pixels = tex.GetPixels();
-        for(int i=0; i < pixels.Length; i++)
-        {
+        for (int i = 0; i < pixels.Length; i++) {
             Color temp = pixels[i];
             temp.r = pixels[i].g;
             temp.a = pixels[i].r;
@@ -76,44 +66,35 @@ public class TextureLoader : MonoBehaviour {
         }
         tex.SetPixels(pixels);
     }
-    public static Texture2D LoadTexture(string fn,bool normalMap = false)
-    {
+    public static Texture2D LoadTexture(string fn, bool normalMap = false) {
         if (!File.Exists(fn))
             return null;
         string ext = Path.GetExtension(fn).ToLower();
-        if (ext == ".png" || ext == ".jpg")
-        {
+        if (ext == ".png" || ext == ".jpg") {
             Texture2D t2d = new Texture2D(1, 1);
             t2d.LoadImage(File.ReadAllBytes(fn));
             if (normalMap)
                 SetNormalMap(ref t2d);
             return t2d;
-        }
-        else if (ext == ".dds")
-        {
+        } else if (ext == ".dds") {
             Texture2D returnTex = LoadDDSManual(fn);
             if (normalMap)
                 SetNormalMap(ref returnTex);
             return returnTex;
-        }else if (ext == ".tga")
-        {
+        } else if (ext == ".tga") {
             Texture2D returnTex = LoadTGA(fn);
-            if(normalMap)
+            if (normalMap)
                 SetNormalMap(ref returnTex);
             return returnTex;
-        }
-        else
-        {
+        } else {
             Debug.Log("texture not supported : " + fn);
         }
         return null;
     }
 
-    public static Texture2D LoadTGA(Stream TGAStream)
-    {
+    public static Texture2D LoadTGA(Stream TGAStream) {
 
-        using (BinaryReader r = new BinaryReader(TGAStream))
-        {
+        using (BinaryReader r = new BinaryReader(TGAStream)) {
             // Skip some header info we don't care about.
             // Even if we did care, we have to move the stream seek point to the beginning,
             // as the previous method in the workflow left it at the end.
@@ -129,10 +110,8 @@ public class TextureLoader : MonoBehaviour {
             Texture2D tex = new Texture2D(width, height);
             Color32[] pulledColors = new Color32[width * height];
 
-            if (bitDepth == 32)
-            {
-                for (int i = 0; i < width * height; i++)
-                {
+            if (bitDepth == 32) {
+                for (int i = 0; i < width * height; i++) {
                     byte red = r.ReadByte();
                     byte green = r.ReadByte();
                     byte blue = r.ReadByte();
@@ -140,20 +119,15 @@ public class TextureLoader : MonoBehaviour {
 
                     pulledColors[i] = new Color32(blue, green, red, alpha);
                 }
-            }
-            else if (bitDepth == 24)
-            {
-                for (int i = 0; i < width * height; i++)
-                {
+            } else if (bitDepth == 24) {
+                for (int i = 0; i < width * height; i++) {
                     byte red = r.ReadByte();
                     byte green = r.ReadByte();
                     byte blue = r.ReadByte();
 
                     pulledColors[i] = new Color32(blue, green, red, 1);
                 }
-            }
-            else
-            {
+            } else {
                 throw new Exception("TGA texture had non 32/24 bit depth.");
             }
 
