@@ -17,7 +17,7 @@ public class NuxeoEntity {
     public string childrenUrl;
 
     public Texture2D image; // for Picture documents
-    public GameObject model; // for 3D documents
+    public Mesh mesh; // for 3D documents
 
     public NuxeoEntity(JSONObject obj, string baseUrl) {
         
@@ -62,8 +62,7 @@ public class NuxeoEntity {
         if (fileDataUrl == null) {
             return false;
         }
-        System.StringComparison sc = System.StringComparison.Ordinal;
-        return fileDataUrl.EndsWith(".obj", sc) || fileDataUrl.EndsWith(".stl", sc);
+        return fileDataUrl.EndsWith(".obj", System.StringComparison.Ordinal);
     }
 
 }

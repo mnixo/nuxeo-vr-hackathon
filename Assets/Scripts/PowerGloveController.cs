@@ -45,11 +45,11 @@ public class PowerGloveController : MonoBehaviour {
             o.transform.localScale = Vector3.one;
             o.transform.Find("NuxeoImagePreviewRaw").gameObject.GetComponent<RawImage>().texture = entity.image;
         } else if (entity.is3d()) {
-            GameObject o = entity.model;
-            o.transform.parent = transform;
-            o.transform.localPosition = new Vector3(0.0f, 0.0f, 0.5f);
-            o.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-            o.transform.localScale *= 0.2f;
+            //GameObject o = entity.model;
+            //o.transform.parent = transform;
+            //o.transform.localPosition = new Vector3(0.0f, 0.0f, 0.5f);
+            //o.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+            //o.transform.localScale *= 0.2f;
         }
     }
 	

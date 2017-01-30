@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -7,7 +8,6 @@ using UnityEngine;
 public class MiniatureExplorerController : MonoBehaviour {
 
     public GameObject miniaturePrefab;
-    public PowerGloveController powerGloveController;
 
     float distance = 4.5f;
     float vAngleIncrement = 16.0f;
@@ -99,32 +99,17 @@ public class MiniatureExplorerController : MonoBehaviour {
         headers.Add("X-NXproperties", "*");
         WWW www = new WWW(entity.fileDataUrl, null, headers);
         yield return www;
-        Debug.Log(www.text);
-        FileStream file = File.Create(Application.persistentDataPath + "/model");
-        BinaryFormatter bf = new BinaryFormatter();
-        bf.Serialize(file, www.text);
-        file.Close();
-        GameObject obj = OBJLoader.LoadOBJFile(Application.persistentDataPath + "/model");
-        Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-        Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-        foreach (Transform child in obj.transform) {
-            Bounds childBB = child.GetComponent<MeshFilter>().mesh.bounds;
-            min.x = Mathf.Min(min.x, childBB.min.x);
-            min.y = Mathf.Min(min.y, childBB.min.y);
-            min.z = Mathf.Min(min.z, childBB.min.z);
-            max.x = Mathf.Max(max.x, childBB.max.x);
-            max.y = Mathf.Max(max.y, childBB.max.y);
-            max.z = Mathf.Max(max.z, childBB.max.z);
-        }
-        Vector3 center = max - min;
-        foreach (Transform child in obj.transform) {
-            child.localScale = Vector3.one;
-            child.localPosition -= max - (center / 2);
-        }
-        obj.transform.parent = transform;
-        obj.transform.localPosition = Vector3.zero;
-        obj.transform.localScale *= 1 / Mathf.Max(Mathf.Max(center.x, center.y), center.z);
-        entity.model = obj;
+
+        objReaderCSharpV4 reader = new objReaderCSharpV4();
+        reader.LoadFile(www.text);
+        Mesh mesh = reader.getMesh();
+        mesh.RecalculateNormals();
+
+        //GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //obj.GetComponent<MeshFilter>().mesh = mesh;
+        //obj.GetComponent<Renderer>().material = new Material(Shader.Find("Standard"));
+
+        entity.mesh = mesh;
         cb(entity);
     }
 
@@ -164,18 +149,18 @@ public class MiniatureExplorerController : MonoBehaviour {
         }
     }
 
-    void updateGlove(NuxeoEntity entity) {
-        powerGloveController.setEntity(entity);
-    }
+    //void updateGlove(NuxeoEntity entity) {
+    //    powerGloveController.setEntity(entity);
+    //}
 
     public void triggerMiniature(MiniatureController miniature) {
         if (miniature.getEntity().isFolderish()) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
         } else if (miniature.getEntity().isPicture()) {
-            StartCoroutine(downloadDocumentImage(miniature.getEntity(), updateGlove));
+            //StartCoroutine(downloadDocumentImage(miniature.getEntity(), updateGlove));
         } else if (miniature.getEntity().is3d()) {
-            StartCoroutine(downloadDocumentModel(miniature.getEntity(), updateGlove));
+            //StartCoroutine(downloadDocumentModel(miniature.getEntity(), updateGlove));
         }
     }
 	
