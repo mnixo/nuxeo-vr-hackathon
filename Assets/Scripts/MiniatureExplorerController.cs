@@ -105,6 +105,7 @@ public class MiniatureExplorerController : MonoBehaviour {
         reader.LoadFile(www.text);
         Mesh mesh = reader.getMesh();
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
         //GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
         //obj.GetComponent<MeshFilter>().mesh = mesh;

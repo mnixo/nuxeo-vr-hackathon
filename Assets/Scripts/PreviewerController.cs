@@ -48,10 +48,17 @@ public class PreviewerController : MonoBehaviour {
             imagePreview.transform.localEulerAngles = Vector3.up * 90;
             imagePreview.transform.localScale = Vector3.one * 3;
         } else if (entity.is3d()) {
-            obj.AddComponent<MeshFilter>();
-            obj.AddComponent<MeshRenderer>();
-            obj.GetComponent<MeshFilter>().mesh = entity.mesh;
-            obj.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
+            Vector3 meshSize = entity.mesh.bounds.size;
+            float maxSize = Mathf.Max(Mathf.Max(meshSize.x, meshSize.y), meshSize.z);
+            GameObject meshPreview = new GameObject();
+            meshPreview.transform.parent = obj.transform;
+            meshPreview.transform.localPosition = Vector3.zero - entity.mesh.bounds.center;
+            meshPreview.transform.localEulerAngles = Vector3.zero;
+            meshPreview.AddComponent<MeshFilter>();
+            meshPreview.AddComponent<MeshRenderer>();
+            meshPreview.GetComponent<MeshFilter>().mesh = entity.mesh;
+            meshPreview.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
+            obj.transform.localScale = Vector3.one * 3 * (1 / maxSize);
         }
     }
 
