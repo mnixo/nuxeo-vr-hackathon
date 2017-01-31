@@ -8,6 +8,7 @@ using UnityEngine;
 public class MiniatureExplorerController : MonoBehaviour {
 
     public GameObject miniaturePrefab;
+    public PreviewerController previewerController;
 
     float distance = 4.5f;
     float vAngleIncrement = 16.0f;
@@ -149,18 +150,18 @@ public class MiniatureExplorerController : MonoBehaviour {
         }
     }
 
-    //void updateGlove(NuxeoEntity entity) {
-    //    powerGloveController.setEntity(entity);
-    //}
+    void updatePreviewer(NuxeoEntity entity) {
+        previewerController.setEntity(entity);
+    }
 
     public void triggerMiniature(MiniatureController miniature) {
         if (miniature.getEntity().isFolderish()) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
         } else if (miniature.getEntity().isPicture()) {
-            //StartCoroutine(downloadDocumentImage(miniature.getEntity(), updateGlove));
+            StartCoroutine(downloadDocumentImage(miniature.getEntity(), updatePreviewer));
         } else if (miniature.getEntity().is3d()) {
-            //StartCoroutine(downloadDocumentModel(miniature.getEntity(), updateGlove));
+            StartCoroutine(downloadDocumentModel(miniature.getEntity(), updatePreviewer));
         }
     }
 	
