@@ -77,7 +77,9 @@ public class MiniatureController : MonoBehaviour {
     }
 
     void onTriggerComplete() {
-        explorer.triggerMiniature(this);
+        if (explorer != null) {
+            explorer.triggerMiniature(this);
+        }
     }
 
     void onTriggerExit() {

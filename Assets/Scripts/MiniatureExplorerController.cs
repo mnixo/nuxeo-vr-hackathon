@@ -9,6 +9,7 @@ public class MiniatureExplorerController : MonoBehaviour {
 
     public GameObject miniaturePrefab;
     public PreviewerController previewerController;
+    public SearchController searchController;
 
     float distance = 4.5f;
     float vAngleIncrement = 16.0f;
@@ -159,10 +160,13 @@ public class MiniatureExplorerController : MonoBehaviour {
         if (miniature.getEntity().isFolderish()) {
             makeNuxeoApiRequest(miniature.getEntity().entityUrl, updateCurrent);
             makeNuxeoApiRequest(miniature.getEntity().childrenUrl, updateChildren);
-        } else if (miniature.getEntity().isPicture()) {
-            StartCoroutine(downloadDocumentImage(miniature.getEntity(), updatePreviewer));
-        } else if (miniature.getEntity().is3d()) {
-            StartCoroutine(downloadDocumentModel(miniature.getEntity(), updatePreviewer));
+        } else {
+            searchController.addEntity(miniature.getEntity());
+            if (miniature.getEntity().isPicture()) {
+                StartCoroutine(downloadDocumentImage(miniature.getEntity(), updatePreviewer));
+            } else if (miniature.getEntity().is3d()) {
+                StartCoroutine(downloadDocumentModel(miniature.getEntity(), updatePreviewer));
+        }
         }
     }
 	
