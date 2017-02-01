@@ -25,7 +25,7 @@ public class MiniatureExplorerController : MonoBehaviour {
     GameObject current;
     List<GameObject> children;
 
-    delegate void Callback(string json);
+    public delegate void Callback(string json);
     delegate void UpdateGloveCallback(NuxeoEntity entity);
 
 	void Awake() {
@@ -73,7 +73,11 @@ public class MiniatureExplorerController : MonoBehaviour {
         StartCoroutine(WaitForRequest(new WWW(url, null, new Dictionary<string, string>()), cb));
     }
 
-    void makeNuxeoApiRequest(string url, Callback cb) {
+    public string getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void makeNuxeoApiRequest(string url, Callback cb) {
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("Authorization", "Basic " + System.Convert.ToBase64String(
             System.Text.Encoding.ASCII.GetBytes(username + ":" + password)));
