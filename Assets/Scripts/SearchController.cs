@@ -108,38 +108,96 @@ public class SearchController : MonoBehaviour {
         if (entity1 == null && entity2 == null && entity3 == null) {
             return;
         }
-        string url = explorer.getBaseUrl() + "api/v1/path/@search?fullText=";
+        string url = explorer.getBaseUrl() + "api/v1/path/@search?pageSize=10&fullText=";
         bool first = true;
+        string[] parts;
         if (entity1 != null) {
-            string[] parts = entity1.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
-            foreach (string part in parts) {
-                if (first) {
-                    first = false;
-                    url += part;
-                } else {
-                    url += "%20OR%20" + part; 
+            if (entity1.title != null) {
+                parts = entity1.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
+                }
+            }
+            if (entity1.description != null) {
+                parts = entity1.description.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
                 }
             }
         }
         if (entity2 != null) {
-            string[] parts = entity2.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
-            foreach (string part in parts) {
-                if (first) {
-                    first = false;
-                    url += part;
-                } else {
-                    url += "%20OR%20" + part;
+            if (entity2.title != null) {
+                parts = entity2.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
+                }
+            }
+            if (entity2.description != null) {
+                parts = entity2.description.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
                 }
             }
         }
         if (entity3 != null) {
-            string[] parts = entity3.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
-            foreach (string part in parts) {
-                if (first) {
-                    first = false;
-                    url += part;
-                } else {
-                    url += "%20OR%20" + part;
+            if (entity3.title != null) {
+                parts = entity3.title.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
+                }
+            }
+            if (entity3.description != null) {
+                parts = entity3.description.Split(new string[] { ".", " " }, StringSplitOptions.None);
+                foreach (string part in parts) {
+                    if (part.Length < 2) {
+                        continue;
+                    }
+                    if (first) {
+                        first = false;
+                        url += part;
+                    } else {
+                        url += "%20OR%20" + part;
+                    }
                 }
             }
         }

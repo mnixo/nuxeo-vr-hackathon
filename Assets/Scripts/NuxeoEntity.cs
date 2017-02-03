@@ -10,6 +10,7 @@ public class NuxeoEntity {
     public string type;
     public string parentRef;
     public string title;
+    public string description;
     public List<string> facets;
     public string fileDataUrl;
 
@@ -36,6 +37,9 @@ public class NuxeoEntity {
             if (properties.HasField("file:content")) {
                 JSONObject fileContent = properties.GetField("file:content");
                 fileDataUrl = fileContent.GetField("data").str;
+            }
+            if (properties.HasField("dc:description")) {
+                description = properties.GetField("dc:description").str;
             }
         }
         if (is3d()) {
