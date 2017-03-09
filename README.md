@@ -1,10 +1,16 @@
 # nuxeo-vr-hackathon
 
+## Videos
+
+[Nuxeo VR Hackathon Submission](https://youtu.be/4zkhtqIWQPs)
+
+[Nuxeo VR Hackathon Submission (VR Mode)](https://youtu.be/QMxWmmBevdc)
+
 
 
 ## Google VR SDK Setup
 
-1. Download the [Unity Package file](https://drive.google.com/a/nuxeo.com/file/d/0B16BOhcXVOmgTFIza2FFMXRLN2c/view?usp=sharing)
+1. Download [GoogleVRForUnityV1.10.0.unitypackage](https://drive.google.com/a/nuxeo.com/file/d/0B16BOhcXVOmgTFIza2FFMXRLN2c/view?usp=sharing)
 
 2. Selecting the `Assets` folder, click `Assets` > `Import Package` > `Custom Package…` > `GoogleVRForUnityV1.10.0.unitypackage`
 
