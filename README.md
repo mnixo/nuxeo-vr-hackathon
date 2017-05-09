@@ -10,7 +10,7 @@
 
 ## Google VR SDK Setup
 
-1. Download [GoogleVRForUnityV1.10.0.unitypackage](https://drive.google.com/a/nuxeo.com/file/d/0B16BOhcXVOmgTFIza2FFMXRLN2c/view?usp=sharing)
+1. Download [GoogleVRForUnityV1.10.0.unitypackage](https://drive.google.com/a/nuxeo.com/file/d/0B16BOhcXVOmgTFIza2FFMXRLN2c/view?usp=sharing) (for Unity 5.5.1f1)
 
 2. Selecting the `Assets` folder, click `Assets` > `Import Package` > `Custom Package…` > `GoogleVRForUnityV1.10.0.unitypackage`
 
